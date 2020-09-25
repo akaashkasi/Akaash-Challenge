@@ -1,0 +1,35 @@
+from oauthlib.oauth2 import BackendApplicationClient
+from requests_oauthlib import OAuth2Session
+from pathlib import Path
+
+cred = ''
+directory = 'home'
+filename = 'credentials.txt'
+# to change the script to look for the credential in the working directory, change the value of home to empty string
+if directory == 'home':
+    home = str(Path.home()) #gets path to home directory; supposed to work for Win and Mac
+    credential_path = home + '/' + filename
+else:
+    directory = 'working'
+    credential_path = filename
+try:
+    with open(credential_path, 'rt', encoding='utf-8') as file_object:
+        cred = file_object.read()
+except:
+    print(filename + ' file not found - is it in your ' + directory + ' directory?')
+    exit()
+
+pieces = cred.split('\n')
+
+
+clientKey = pieces[0]
+clientSecret = pieces[1]
+requestTokenUrl = 'https://api.twitter.com/oauth2/token'
+
+clientObject = BackendApplicationClient(client_id=clientKey)
+oauth = OAuth2Session(client=clientObject)
+accessToken = oauth.fetch_token(token_url=requestTokenUrl, client_id=clientKey, client_secret=clientSecret)
+# access token should be cached/saved and used repeatedly rather than making many requests fo a new token
+#print(accessToken)
+#print(accessToken['access_token'])
+bearerAccessToken = accessToken['access_token']
